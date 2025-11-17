@@ -1,0 +1,17 @@
+# Git 관련 파일
+.git
+.gitignore
+
+# node_modules는 컨테이너 안에서 RUN npm ci로 설치할 것이므로 제외
+node_modules
+
+# Docker 관련 파일
+Dockerfile
+.dockerignore
+
+# 기타 로컬 파일
+.env
+*.env
+README.md
+npm-debug.log
+.prettierrc.json

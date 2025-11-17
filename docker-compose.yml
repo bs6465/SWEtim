@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  frontend:
+    image: bs6465/swe-frontend:latest # 빌드한 이미지 이름
+    container_name: swe-frontend
+    ports:
+      - '3000:80'
+    depends_on:
+      - backend
+
+  # Node.js 백엔드 서비스
+  backend:
+    image: bs6465/swetim:latest # 빌드한 이미지 이름
+    container_name: swetim
+    environment:
+      # 여기에 DB 연결 정보를 넣습니다.
+      # 'db'는 아래 정의한 PostgreSQL 서비스의 이름입니다.
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}
+    depends_on:
+      - db # db 서비스가 먼저 실행된 후에 backend가 실행되도록 합니다.
+
+  # PostgreSQL 서비스
+  db:
+    image: postgres:18
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    container_name: my-postgres-swetim
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/18/docker
+
+volumes:
+  pgdata: # 데이터베이스 데이터를 영구적으로 저장하기 위한 볼륨
