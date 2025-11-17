@@ -1,0 +1,46 @@
+# .github/workflows/docker-build-push.yml
+name: Build and Push Docker Image
+
+# main 브랜치에 push 이벤트가 발생했을 때 실행
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest # GitHub이 제공하는 가상 머신
+    steps:
+      # 1. 코드를 체크아웃
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      # 2. Docker Hub 로그인 (Secrets 사용)
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # 3. Docker 이미지 빌드 및 푸시
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: . # Dockerfile 위치
+          push: true # 빌드 후 푸시
+          tags: ${{ secrets.DOCKER_USERNAME }}/swetim:latest # 이미지 태그
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push # build-and-push 잡이 성공해야 실행
+    steps:
+      - name: Deploy to Home Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd ~/project/swe # docker-compose.yml 파일이 있는 경로로 이동
+            docker pull ${{ secrets.DOCKER_USERNAME }}/swetim:latest
+            docker compose up -d --force-recreate
+            docker image prune -f # 불필요한 예전 이미지 삭제 (선택 사항)
