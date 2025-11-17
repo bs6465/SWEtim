@@ -49,7 +49,7 @@ jobs:
             flock -w 120 /tmp/swe-deploy.lock -c " \
               echo 'Deploy Lock Acquired by ${{ github.workflow }}, starting deploy...'; \
               cd ~/project/swe; \
-              docker pull ${{ secrets.DOCKER_USERNAME }}/swe-frontend:latest; \
+              docker pull ${{ secrets.DOCKER_USERNAME }}/swetim:latest; \
               docker compose up -d --force-recreate; \
               docker image prune -f; \
               echo 'Deploy ${{ github.workflow }} Finished, Releasing Lock.'; \
