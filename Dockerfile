@@ -13,7 +13,7 @@ RUN npm ci
 COPY . .
 
 # TypeScript 등을 JavaScript로 빌드
-RUN npm run build
+# RUN npm run build
 
 # -----------------------------------------------
 
