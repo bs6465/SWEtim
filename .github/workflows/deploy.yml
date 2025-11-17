@@ -30,7 +30,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/swe-frontend:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/swetim:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -44,6 +44,6 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd ~/project/swe
-            docker pull ${{ secrets.DOCKER_USERNAME }}/swe-frontend:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/swetim:latest
             docker compose up -d --force-recreate
             docker image prune -f
