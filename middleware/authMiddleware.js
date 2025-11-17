@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const db = require('../db');
 
 /*
 JWT 토큰을 바탕으로 user_id, username 가져오기
