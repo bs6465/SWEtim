@@ -82,8 +82,7 @@ exports.chechRightTeam = (req, res, next) => {
 exports.checkTeamOwner = (req, res, next) => {
   exports.checkAuthAndTeam(req, res, async () => {
     try {
-      const { teamId } = req.params; // URL에서 teamId를 가져옴
-      const { userId } = req.user; // 인증된 유저의 ID
+      const { userId, teamId } = req.user; // 인증된 유저의 ID
 
       const query = 'SELECT owner_userid FROM teams WHERE team_id = $1';
       const teamResult = await db.query(query, [teamId]);
