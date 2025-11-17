@@ -1,5 +1,5 @@
 # .github/workflows/deploy.yml
-name: SWE-frontend Build and Deploy
+name: SWEtim Build and Deploy
 
 on:
   push:
@@ -43,7 +43,14 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd ~/project/swe
-            docker pull ${{ secrets.DOCKER_USERNAME }}/swetim:latest
-            docker compose up -d --force-recreate
-            docker image prune -f
+            # /tmp/swe-deploy.lock 파일을 기준으로 잠금을 시도합니다.
+            # -w 120 : 최대 120초(2분) 동안 잠금을 기다립니다.
+            # -c "..." : 잠금에 성공하면 "..." 안의 명령어를 실행합니다.
+            flock -w 120 /tmp/swe-deploy.lock -c " \
+              echo 'Deploy Lock Acquired by ${{ github.workflow }}, starting deploy...'; \
+              cd ~/project/swe; \
+              docker pull ${{ secrets.DOCKER_USERNAME }}/swe-frontend:latest; \
+              docker compose up -d --force-recreate; \
+              docker image prune -f; \
+              echo 'Deploy ${{ github.workflow }} Finished, Releasing Lock.'; \
+            "
