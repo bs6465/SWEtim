@@ -133,7 +133,7 @@ exports.addMember = async (req, res) => {
     const io = getIo();
     io.to(teamId).emit('userAdded', {
       message: '새 팀원이 추가되었습니다.',
-      user: addUserId,
+      user: resultTeam.rows[0].user_id,
       username: resultTeam.rows[0].username,
     });
 
