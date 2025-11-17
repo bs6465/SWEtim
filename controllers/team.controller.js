@@ -127,7 +127,7 @@ exports.addMember = async (req, res) => {
   }
 
   try {
-    const query = 'UPDATE users SET team_id = $1 WHERE user_id = $2 RETURNING *';
+    const query = 'UPDATE users SET team_id = $1 WHERE username = $2 RETURNING *';
     const resultTeam = await db.query(query, [teamId, addUserId]);
 
     const io = getIo();
