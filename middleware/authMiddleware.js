@@ -15,7 +15,7 @@ exports.verifyToken = (req, res, next) => {
   if (token == null) {
     return res.status(401).json({ message: '토큰이 없습니다.' });
   }
-
+  
   // 2. 토큰 검증
   jwt.verify(token, process.env.JWT_SECRET_KEY, (err, user) => {
     if (err) {
