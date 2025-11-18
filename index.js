@@ -1,14 +1,14 @@
 require('dotenv').config();
 
 const express = require('express');
-// const cors = require('cors'); // cors 라이브러리 불러오기
+const cors = require('cors'); // cors 라이브러리 불러오기
 const http = require('http');
 const { initSocketIO } = require('./websocket'); // 웹소켓 핸들러 가져오기
 const app = express();
 const port = 3000;
 
 // 1. 전역 미들웨어 설정
-// app.use(cors());
+app.use(cors());
 app.use(express.json()); // JSON 파싱
 
 app.get('/', (req, res) => {
