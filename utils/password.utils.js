@@ -12,7 +12,6 @@ async function hashPassword(plainPassword) {
     return hash;
   } catch (err) {
     console.error('Hashing error:', err);
-    // 실제 프로덕션에서는 더 정교한 에러 처리가 필요할 수 있습니다.
     throw new Error('Error hashing password');
   }
 }

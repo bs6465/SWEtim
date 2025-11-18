@@ -1,5 +1,5 @@
 const express = require('express');
-const router = express.Router(); // express의 라우터 기능을 사용합니다.
+const router = express.Router(); // express의 라우터 기능을 사용
 
 /*
 로그인, 회원가입 routes

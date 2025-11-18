@@ -63,9 +63,9 @@ exports.getSchedulesByMonth = async (req, res) => {
   }
 
   try {
-    // 2. 검색할 월의 첫날(monthStart)과 마지막 날(monthEnd)을 계산합니다.
+    // 검색할 월의 첫날(monthStart)과 마지막 날(monthEnd)을 계산
 
-    // parseInt로 숫자로 변경합니다.
+    // parseInt로 숫자로 변경
     // JS의 Date 객체는 월이 0부터 시작하므로 (0=1월, 1=2월...) month - 1을 해줍니다.
     const yearNum = parseInt(year);
     const monthNum = parseInt(month); // 1-based (예: 3월은 3)

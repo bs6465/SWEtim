@@ -2,8 +2,7 @@ require('dotenv').config();
 
 const express = require('express');
 // const cors = require('cors'); // cors 라이브러리 불러오기
-// const db = require('./db'); // 3단계에서 만든 db.js 모듈을 가져옵니다.
-const http = require('http'); // 👈 이 줄을 추가하세요
+const http = require('http');
 const { initSocketIO } = require('./websocket'); // 웹소켓 핸들러 가져오기
 const app = express();
 const port = 3000;

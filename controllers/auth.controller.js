@@ -1,7 +1,7 @@
 // auth.controller.js
-const db = require('../db'); // (db 연결 파일 경로)
-const auth = require('../utils/password.utils'); // (auth 유틸 파일 경로)
-const jwttoken = require('../utils/jwttoken.utils'); // (auth 유틸 파일 경로)
+const db = require('../db');
+const auth = require('../utils/password.utils');
+const jwttoken = require('../utils/jwttoken.utils');
 const { getIo } = require('../websocket');
 /*
 로그인, 회원가입 로직
@@ -18,7 +18,7 @@ exports.getUsers = async (req, res) => {
   }
 };
 
-// 'verifyToken' 미들웨어를 중간에 추가!
+// 
 exports.getMe = async (req, res) => {
   const { userId } = req.user;
   try {
@@ -37,12 +37,6 @@ exports.getMe = async (req, res) => {
 
 // 회원가입
 exports.register = async (req, res) => {
-  /*
-    회원가입
-    curl -d '{"username":"kcd", "password":"aa12"}' \
-    -H "Content-Type: application/json" \
-    -X POST [ip]/auth/register/
-    */
   const { username, password } = req.body;
   let hashedPassword;
   try {
@@ -103,7 +97,7 @@ exports.login = async (req, res) => {
 
       res.status(200).json({
         message: '로그인 성공!',
-        token: token, // 클라이언트는 이 토큰을 저장합니다.
+        token: token, // 클라이언트는 이 토큰을 저장
       });
     } catch (error) {
       console.error('Token Generation Error:', error);
