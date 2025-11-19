@@ -188,11 +188,11 @@ exports.leaveTeam = async (req, res) => {
     const updatedUser = { userId, username, teamId: null };
     const token = jwttoken.generateToken(updatedUser);
 
-    const io = getIo();
-    io.to(teamId).emit('removeUser', {
-      message: '팀원 나감',
-      user: userId,
-    });
+    // const io = getIo();
+    // io.to(teamId).emit('removeUser', {
+    //   message: '팀원 나감',
+    //   user: userId,
+    // });
 
     res.status(200).json({
       message: '팀 나감 완료',
