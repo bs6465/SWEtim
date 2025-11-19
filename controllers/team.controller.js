@@ -176,7 +176,7 @@ exports.leaveTeam = async (req, res) => {
     const teamQuery = 'SELECT owner_userid FROM teams WHERE team_id = $1';
     const teamResult = await db.query(teamQuery, [teamId]);
 
-    if (teamResult.rows.length > 0 && ownerId === userId) {
+    if (teamResult.rows.length > 0 && teamQuery.rows[0].owner_userid === userId) {
       return res
         .status(400)
         .json({ message: '팀 소유주는 나갈 수 없습니다. 팀을 삭제하거나 소유권을 이전하세요.' });
