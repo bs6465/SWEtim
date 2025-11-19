@@ -115,7 +115,7 @@ exports.changeTeamOwner = async (req, res) => {
 // DELETE /delete-team 팀 제거
 exports.deleteTeam = async (req, res) => {
   // 팀오너 확인 완료
-  const { teamId } = req.user;
+  const { userId, username, teamId } = req.user;
   try {
     const query = 'DELETE FROM teams WHERE team_id = $1';
     const resultTeam = await db.query(query, [teamId]);
