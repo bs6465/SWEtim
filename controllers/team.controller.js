@@ -63,7 +63,7 @@ exports.getTeam = async (req, res) => {
       message: '팀 정보 완료',
       teamId: teamId,
       ownerId: ownerId,
-      members: membersResult.rows,
+      members: resultTeam.rows,
     });
   } catch (err) {
     console.error('팀원 찾기 중 에러:', err);
