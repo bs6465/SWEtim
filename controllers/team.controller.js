@@ -54,7 +54,17 @@ exports.getTeam = async (req, res) => {
   try {
     const query = 'SELECT user_id, username FROM users WHERE team_id = $1';
     const resultTeam = await db.query(query, [teamId]);
-    res.status(200).json(resultTeam.rows); // REFACTOR: message 객체 제거
+
+    const teamQuery = 'SELECT owner_userid FROM teams WHERE team_id = $1';
+    const teamResult = await db.query(teamQuery, [teamId]);
+    const ownerId = teamResult.rows[0]?.owner_userid;
+
+    res.status(200).json({
+      message: '팀 정보 완료',
+      teamId: teamId,
+      ownerId: ownerId,
+      members: membersResult.rows,
+    });
   } catch (err) {
     console.error('팀원 찾기 중 에러:', err);
     res.status(500).json({ message: '팀 찾기 실패' });
