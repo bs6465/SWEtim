@@ -5,7 +5,9 @@ services:
     image: bs6465/swe-frontend:latest # 빌드한 이미지 이름
     container_name: swe-frontend
     ports:
-      - '3000:80'
+      - '8080:80'
+    environment:
+      VITE_API_URL: ${VITE_API_URL}
     depends_on:
       - backend
 
@@ -21,6 +23,9 @@ services:
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_NAME: ${POSTGRES_DB}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+    ports:
+      - '3000:3000'
     depends_on:
       - db # db 서비스가 먼저 실행된 후에 backend가 실행되도록 합니다.
 
