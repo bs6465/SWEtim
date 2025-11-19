@@ -4,15 +4,16 @@ const { getIo } = require('../websocket');
 // POST / 새 일정 만들기
 exports.createSchedule = async (req, res) => {
   const { userId, teamId } = req.user;
-  const { title, description, start_time, end_time, color } = req.body;
+  const { title, description, start_time, end_time } = req.body;
+  let { color } = req.body;
 
   if (!title) {
     return res.status(400).json({ message: '제목(title)은 필수입니다.' });
   }
 
   try {
-    const color = color.toUpperCase();
-    
+    color = color.toUpperCase();
+
     const query =
       'INSERT INTO schedules (user_id, team_id, title, description, start_time, end_time, color) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *';
     const result = await db.query(query, [
