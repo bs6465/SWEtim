@@ -167,6 +167,58 @@ exports.addMember = async (req, res) => {
   }
 };
 
+// POST /api/team/join (초대 링크로 팀 합류)
+exports.joinTeam = async (req, res) => {
+  const { userId, username } = req.user;
+  const { teamId } = req.body; // 링크에서 추출한 teamId
+
+  if (!teamId) {
+    return res.status(400).json({ message: '팀 ID가 필요합니다.' });
+  }
+
+  // 이미 팀이 있는 경우 체크
+  if (req.user.teamId) {
+    return res.status(400).json({ 
+      message: '이미 다른 팀에 소속되어 있습니다. 기존 팀을 먼저 나가주세요.' 
+    });
+  }
+
+  try {
+    // 1. 팀이 실제로 존재하는지 확인
+    const checkTeamQuery = 'SELECT * FROM teams WHERE team_id = $1';
+    const teamResult = await db.query(checkTeamQuery, [teamId]);
+    
+    if (teamResult.rows.length === 0) {
+      return res.status(404).json({ message: '존재하지 않는 팀입니다.' });
+    }
+
+    // 2. 유저 정보 업데이트 (팀 합류)
+    const updateQuery = 'UPDATE users SET team_id = $1 WHERE user_id = $2 RETURNING *';
+    await db.query(updateQuery, [teamId, userId]);
+
+    // 3. 새 토큰 발급 (teamId 포함)
+    const updatedUser = { userId, username, teamId: teamId };
+    const token = jwttoken.generateToken(updatedUser);
+
+    // 4. 소켓 알림 (기존 팀원들에게)
+    const io = getIo();
+    io.to(teamId).emit('userAdded', {
+      message: '새 팀원이 초대 링크로 합류했습니다.',
+      user: userId,
+      username: username
+    });
+
+    res.status(200).json({
+      message: '팀 합류 성공!',
+      token: token,
+      teamId: teamId
+    });
+  } catch (err) {
+    console.error('팀 합류 에러:', err);
+    res.status(500).json({ message: '팀 합류 실패' });
+  }
+};
+
 // DELETE /me 팀 나가기
 exports.leaveTeam = async (req, res) => {
   const { userId, username, teamId } = req.user;
