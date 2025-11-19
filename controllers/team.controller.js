@@ -144,6 +144,46 @@ exports.addMember = async (req, res) => {
   }
 };
 
+// DELETE /me 팀 나가기
+exports.leaveTeam = async (req, res) => {
+  const { userId, username, teamId } = req.user;
+
+  try {
+    // 팀장(Owner)인지 먼저 확인
+    const teamQuery = 'SELECT owner_userid FROM teams WHERE team_id = $1';
+    const teamResult = await db.query(teamQuery, [teamId]);
+
+    if (teamResult.rows.length > 0) {
+      const ownerId = teamResult.rows[0].owner_userid;
+      if (ownerId === userId) {
+        return res.status(400).json({
+          message: '팀 소유주는 나갈 수 없습니다. 팀을 삭제하거나 소유권을 이전하세요.',
+        });
+      }
+    }
+
+    const query = 'UPDATE users SET team_id = NULL WHERE user_id = $1 RETURNING *';
+    const resultTeam = await db.query(query, [userId]);
+
+    const updatedUser = { userId, username, teamId: resultTeam.rows[0].team_id };
+    const token = jwttoken.generateToken(updatedUser);
+
+    const io = getIo();
+    io.to(teamId).emit('removeUser', {
+      message: '팀원 나감',
+      user: userId,
+    });
+
+    res.status(200).json({
+      message: '팀 나감 완료',
+      token: token,
+    });
+  } catch (err) {
+    console.error('팀원 나감 에러:', err);
+    res.status(500).json({ message: '팀 나감 실패' });
+  }
+};
+
 // DELETE /members 팀원 퇴출
 exports.removeMember = async (req, res) => {
   // 팀오너 확인 완료

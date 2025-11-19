@@ -26,6 +26,9 @@ router.delete('/delete-team', [verifyToken, checkTeamOwner], teamController.dele
 // POST /members 새 팀원 추가
 router.post('/members', [verifyToken, checkTeamOwner], teamController.addMember);
 
+// DELETE /me 팀 나가기
+router.delete('/me', [verifyToken, checkAuthAndTeam], teamController.leaveTeam);
+
 // DELETE /members 팀원 퇴출
 router.delete('/members', [verifyToken, checkTeamOwner], teamController.removeMember);
 
