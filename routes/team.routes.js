@@ -14,6 +14,9 @@ router.post('/', [verifyToken, checkAuth], teamController.createTeam);
 // GET / 내가 속한 팀 가져오기
 router.get('/', [verifyToken, checkAuthAndTeam], teamController.getTeam);
 
+// POST /api/team/join (초대 링크로 팀 합류)
+router.post('/join', [verifyToken, checkAuth], controller.joinTeam);
+
 // GET /get-team-id 내 팀 id 가져오기
 router.get('/get-team-id', [verifyToken, checkAuth], teamController.findTeamId);
 
