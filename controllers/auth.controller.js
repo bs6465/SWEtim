@@ -37,7 +37,7 @@ exports.getMe = async (req, res) => {
 
 // 회원가입
 exports.register = async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, timezone, timezoneOffset } = req.body;
   let hashedPassword;
   try {
     hashedPassword = await auth.hashPassword(password);
@@ -47,9 +47,18 @@ exports.register = async (req, res) => {
   }
 
   try {
-    const query =
-      'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING user_id, username';
-    const result = await db.query(query, [username, hashedPassword]);
+    const query = `
+      INSERT INTO users (username, password, timezone, timezone_offset) 
+      VALUES ($1, $2, $3, $4) 
+      RETURNING user_id, username, timezone
+    `;
+    const result = await db.query(query, [
+      username,
+      hashedPassword,
+      timezone || 'Asia/Seoul',
+      timezoneOffset !== undefined ? timezoneOffset : 540,
+    ]);
+
     res.status(201).json(result.rows[0]);
   } catch (err) {
     if (err.code === '23505') {
@@ -58,6 +67,34 @@ exports.register = async (req, res) => {
       console.error('Server Error:', err);
       res.status(500).json({ message: 'Server Error' });
     }
+  }
+};
+
+// 시간대 변경 API
+exports.updateTimezone = async (req, res) => {
+  const { userId } = req.user;
+  const { timezone, timezoneOffset } = req.body;
+
+  try {
+    const query = `
+      UPDATE users 
+      SET timezone = $1, timezone_offset = $2 
+      WHERE user_id = $3 
+      RETURNING user_id, username, timezone, timezone_offset
+    `;
+    const result = await db.query(query, [timezone, timezoneOffset, userId]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: '유저를 찾을 수 없습니다.' });
+    }
+
+    res.status(200).json({ 
+      message: '시간대가 변경되었습니다.',
+      user: result.rows[0]
+    });
+  } catch (err) {
+    console.error('시간대 변경 에러:', err);
+    res.status(500).json({ message: '시간대 변경 실패' });
   }
 };
 

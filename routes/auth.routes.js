@@ -19,6 +19,9 @@ router.get('/me', [verifyToken, checkAuth], authController.getMe);
 // POST /users/ (회원가입) -> authController.register 함수
 router.post('/register', authController.register);
 
+// PUT /timezone 타임존 변경
+router.put('/timezone', [verifyToken, checkAuth], controller.updateTimezone);
+
 // POST /users/login (로그인) -> authController.login 함수
 router.post('/login', authController.login);
 
