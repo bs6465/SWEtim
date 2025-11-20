@@ -71,6 +71,11 @@ exports.getSchedulesByMonth = async (req, res) => {
     const yearNum = parseInt(year);
     const monthNum = parseInt(month); // 1-based (예: 3월은 3)
 
+    // 캘린더 화면상 이전 달/다음 달 일부가 보일 수 있으므로 여유 있게 검색 범위를 잡습니다.
+    // (예: 해당 월 1일 - 7일 ~ 해당 월 말일 + 7일)
+    const searchStart = new Date(yearNum, monthNum - 1, -6);
+    const searchEnd = new Date(yearNum, monthNum, 7);
+
     // 월의 첫날 (예: 2025년 3월 1일 00:00:00)
     const monthStart = new Date(yearNum, monthNum - 1, 1);
 
@@ -81,20 +86,68 @@ exports.getSchedulesByMonth = async (req, res) => {
     // 마지막 날의 23시 59분 59초로 설정해야 그날 끝나는 일정도 포함됩니다.
     monthEnd.setHours(23, 59, 59, 999);
 
-    // 3. 올바른 SQL 쿼리 실행
+    // [핵심 수정] schedules 테이블과 tasks 테이블을 조인하여 진행률 계산
     const query = `
-      SELECT * FROM schedules 
-      WHERE team_id = $1 
-      AND start_time <= $3
-      AND end_time >= $2
+      SELECT 
+        s.*,
+        COALESCE(COUNT(t.task_id), 0) AS total_tasks,
+        COALESCE(SUM(CASE WHEN t.is_completed THEN 1 ELSE 0 END), 0) AS completed_tasks
+      FROM schedules s
+      LEFT JOIN tasks t ON s.schedule_id = t.schedule_id
+      WHERE s.team_id = $1 
+      AND s.end_time >= $2 
+      AND s.start_time <= $3
+      GROUP BY s.schedule_id
+      ORDER BY s.start_time ASC
     `;
 
-    // 4. db.query에 계산된 날짜 객체를 전달 (pg 드라이버가 자동으로 변환)
-    const result = await db.query(query, [teamId, monthStart, monthEnd]);
-    res.status(200).json(result.rows);
+    const result = await db.query(query, [teamId, searchStart, searchEnd]);
+
+    // 숫자로 변환 (COUNT 결과는 문자열로 올 수 있음)
+    const schedules = result.rows.map((row) => ({
+      ...row,
+      total_tasks: parseInt(row.total_tasks),
+      completed_tasks: parseInt(row.completed_tasks),
+    }));
+
+    res.status(200).json(schedules);
   } catch (err) {
     console.error('일정 조회 에러:', err);
     res.status(500).json({ message: '일정 조회에 실패했습니다.' });
+  }
+};
+
+// PUT /:scheduleId 일정 수정
+exports.updateSchedule = async (req, res) => {
+  const { scheduleId } = req.params;
+  const { title, description, notes, start_time, end_time, color } = req.body;
+
+  try {
+    const query = `
+      UPDATE schedules 
+      SET title=$1, description=$2, notes=$3, start_time=$4, end_time=$5, color=$6
+      WHERE schedule_id = $7
+      RETURNING *
+    `;
+    
+    // (참고: start_time, end_time은 프론트에서 toISOString()으로 보낸다고 가정)
+    const result = await db.query(query, [
+      title, description, notes, start_time, end_time, color, scheduleId
+    ]);
+
+    if (result.rowCount === 0) return res.status(404).json({ message: '일정 없음' });
+
+    const io = getIo();
+    // 수정된 일정 정보를 소켓으로 전송 (캘린더 갱신용)
+    io.to(req.user.teamId).emit('scheduleUpdated', { 
+        message: '일정이 수정되었습니다.',
+        schedule: result.rows[0] 
+    });
+
+    res.status(200).json(result.rows[0]);
+  } catch (err) {
+    console.error('일정 수정 에러:', err);
+    res.status(500).json({ message: '일정 수정 실패' });
   }
 };
 
