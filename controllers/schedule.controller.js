@@ -120,7 +120,10 @@ exports.getSchedulesByMonth = async (req, res) => {
 // PUT /:scheduleId 일정 수정
 exports.updateSchedule = async (req, res) => {
   const { scheduleId } = req.params;
-  const { title, description, notes, start_time, end_time, color } = req.body;
+  const { title, description, notes, start_time, end_time } = req.body;
+  let { color } = req.body;
+
+  color = color.toUpperCase();
 
   try {
     const query = `
@@ -129,19 +132,25 @@ exports.updateSchedule = async (req, res) => {
       WHERE schedule_id = $7
       RETURNING *
     `;
-    
+
     // (참고: start_time, end_time은 프론트에서 toISOString()으로 보낸다고 가정)
     const result = await db.query(query, [
-      title, description, notes, start_time, end_time, color, scheduleId
+      title,
+      description,
+      notes,
+      start_time,
+      end_time,
+      color,
+      scheduleId,
     ]);
 
     if (result.rowCount === 0) return res.status(404).json({ message: '일정 없음' });
 
     const io = getIo();
     // 수정된 일정 정보를 소켓으로 전송 (캘린더 갱신용)
-    io.to(req.user.teamId).emit('scheduleUpdated', { 
-        message: '일정이 수정되었습니다.',
-        schedule: result.rows[0] 
+    io.to(req.user.teamId).emit('scheduleUpdated', {
+      message: '일정이 수정되었습니다.',
+      schedule: result.rows[0],
     });
 
     res.status(200).json(result.rows[0]);
