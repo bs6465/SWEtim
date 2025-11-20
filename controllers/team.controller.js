@@ -52,7 +52,7 @@ exports.getTeam = async (req, res) => {
   const { teamId } = req.user;
 
   try {
-    const query = 'SELECT user_id, username FROM users WHERE team_id = $1';
+    const query = 'SELECT user_id, username, timezone FROM users WHERE team_id = $1';
     const resultTeam = await db.query(query, [teamId]);
 
     const teamQuery = 'SELECT owner_userid FROM teams WHERE team_id = $1';

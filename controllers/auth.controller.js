@@ -18,11 +18,11 @@ exports.getUsers = async (req, res) => {
   }
 };
 
-// 
+//
 exports.getMe = async (req, res) => {
   const { userId } = req.user;
   try {
-    const query = 'SELECT user_id, username, team_id FROM users WHERE user_id = $1';
+    const query = 'SELECT user_id, username, team_id, timezone FROM users WHERE user_id = $1';
     const userProfile = await db.query(query, [userId]);
 
     if (userProfile.rows.length === 0) {
