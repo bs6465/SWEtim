@@ -260,6 +260,7 @@ exports.leaveTeam = async (req, res) => {
 exports.removeMember = async (req, res) => {
   // 팀오너 확인 완료
   const { userId: ownerId } = req.user;
+  const { teamId } = req.user;
   const { deleteUserId } = req.body;
 
   if (!deleteUserId) {
