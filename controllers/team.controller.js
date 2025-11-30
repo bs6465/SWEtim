@@ -178,8 +178,8 @@ exports.joinTeam = async (req, res) => {
 
   // 이미 팀이 있는 경우 체크
   if (req.user.teamId) {
-    return res.status(400).json({ 
-      message: '이미 다른 팀에 소속되어 있습니다. 기존 팀을 먼저 나가주세요.' 
+    return res.status(400).json({
+      message: '이미 다른 팀에 소속되어 있습니다. 기존 팀을 먼저 나가주세요.',
     });
   }
 
@@ -187,7 +187,7 @@ exports.joinTeam = async (req, res) => {
     // 1. 팀이 실제로 존재하는지 확인
     const checkTeamQuery = 'SELECT * FROM teams WHERE team_id = $1';
     const teamResult = await db.query(checkTeamQuery, [teamId]);
-    
+
     if (teamResult.rows.length === 0) {
       return res.status(404).json({ message: '존재하지 않는 팀입니다.' });
     }
@@ -205,13 +205,13 @@ exports.joinTeam = async (req, res) => {
     io.to(teamId).emit('userAdded', {
       message: '새 팀원이 초대 링크로 합류했습니다.',
       user: userId,
-      username: username
+      username: username,
     });
 
     res.status(200).json({
       message: '팀 합류 성공!',
       token: token,
-      teamId: teamId
+      teamId: teamId,
     });
   } catch (err) {
     console.error('팀 합류 에러:', err);
